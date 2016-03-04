@@ -45,6 +45,7 @@ all: vx-gcc-gcc_asan
 
 # Set up script for native leader and native follower built with gcc
 vx-gcc-gcc: $(VIM_GCC)
+	rm -rf $(INSTALL_DIR) || true
 	cp -r $(INSTALL_GCC) $(INSTALL_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"        >  $(VIM)
@@ -53,6 +54,7 @@ vx-gcc-gcc: $(VIM_GCC)
 
 # Set up script for native leader and sanitized follower built with gcc
 vx-gcc-gcc_asan: $(VIM_GCC) $(VIM_GCC_ASAN)
+	rm -rf $(INSTALL_DIR) || true
 	cp -r $(INSTALL_GCC) $(INSTALL_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"             >  $(VIM)
@@ -61,7 +63,7 @@ vx-gcc-gcc_asan: $(VIM_GCC) $(VIM_GCC_ASAN)
 
 # Build using gcc and no sanitization
 $(VIM_GCC):
-	rm -rf $(INSTALL_DIR)
+	rm -rf $(INSTALL_DIR) || true
 	rm src/auto/config.cache || true
 	make -C .. clean
 	cd .. ; CC=$(GCC)         \
@@ -78,10 +80,10 @@ $(VIM_GCC):
 
 # Build using gcc and sanitization
 $(VIM_GCC_ASAN):
-	rm -rf $(INSTALL_DIR)
+	rm -rf $(INSTALL_DIR) || true
 	rm src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(CC)                        \
+	cd .. ; CC=$(GCC)                       \
   	CFLAGS="$(CFLAGS) -fsanitize=address" \
   	LDFLAGS="-fsanitize=address"          \
   	STRIP="$(STRIP)"                      \
@@ -100,6 +102,7 @@ $(VIM_GCC_ASAN):
 
 # Set up script for native leader and native follower built with clang
 vx-clang-clang: $(VIM_CLANG)
+	rm -rf $(INSTALL_DIR) || true
 	cp -r $(INSTALL_CLANG) $(INSTALL_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"            >  $(VIM)
@@ -108,6 +111,7 @@ vx-clang-clang: $(VIM_CLANG)
 
 # Set up script for native leader and sanitized follower built with clang
 vx-clang-clang_asan: $(VIM_CLANG) $(VIM_CLANG_ASAN)
+	rm -rf $(INSTALL_DIR) || true
 	cp -r $(INSTALL_CLANG) $(INSTALL_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"                 >  $(VIM)
@@ -116,7 +120,7 @@ vx-clang-clang_asan: $(VIM_CLANG) $(VIM_CLANG_ASAN)
 
 # Build using clang and no sanitization
 $(VIM_CLANG):
-	rm -rf $(INSTALL_DIR)
+	rm -rf $(INSTALL_DIR) || true
 	rm src/auto/config.cache || true
 	make -C .. clean
 	cd .. ; CC=$(CLANG)       \
@@ -133,7 +137,7 @@ $(VIM_CLANG):
 
 # Build using clang and sanitization
 $(VIM_CLANG_ASAN):
-	rm -rf $(INSTALL_DIR)
+	rm -rf $(INSTALL_DIR) || true
 	rm src/auto/config.cache || true
 	make -C .. clean
 	cd .. ; CC=$(CLANG)                     \
