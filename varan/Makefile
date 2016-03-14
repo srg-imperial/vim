@@ -9,8 +9,11 @@ GCC    = $(shell which gcc)
 CLANG  = $(shell which clang)
 
 # For debugging
-STRIP  = /usr/bin/true
+STRIP  = $(shell which true)
 CFLAGS = -O0 -g
+
+# VIM config flags
+VIM_CFG_FLAGS=--disable-gui --without-x --with-features=huge
 
 # Where each version expects to be installed
 INSTALL_DIR      = $(PWD)/install/vim
@@ -31,9 +34,9 @@ VIM_CLANG_ASAN = $(INSTALL_CLANG_ASAN)/bin/vim
 VIM = $(PWD)/bin/vim
 
 # Command lines to run VIM with Varan inside script
-RUN_GCC_GCC      = ASAN_OPTIONS="handle_segv=0" $(VX) $(VIM_GCC) $(VIM_GCC)      -- \$$@
-RUN_GCC_GCC_ASAN = ASAN_OPTIONS="handle_segv=0" $(VX) $(VIM_GCC) $(VIM_GCC_ASAN) -- \$$@
-RUN_CLANG_CLANG      = ASAN_OPTIONS="handle_segv=0" $(VX) $(VIM_CLANG) $(VIM_CLANG)      -- \$$@
+RUN_GCC_GCC          =                              $(VX) $(VIM_GCC) $(VIM_GCC)          -- \$$@
+RUN_GCC_GCC_ASAN     = ASAN_OPTIONS="handle_segv=0" $(VX) $(VIM_GCC) $(VIM_GCC_ASAN)     -- \$$@
+RUN_CLANG_CLANG      =                              $(VX) $(VIM_CLANG) $(VIM_CLANG)      -- \$$@
 RUN_CLANG_CLANG_ASAN = ASAN_OPTIONS="handle_segv=0" $(VX) $(VIM_CLANG) $(VIM_CLANG_ASAN) -- \$$@
 
 # Main target
@@ -64,15 +67,14 @@ vx-gcc-gcc_asan: $(VIM_GCC) $(VIM_GCC_ASAN)
 # Build using gcc and no sanitization
 $(VIM_GCC):
 	rm -rf $(INSTALL_DIR) || true
-	rm src/auto/config.cache || true
+	rm ../src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(GCC)         \
+	cd .. ; CC=$(GCC)       \
   	CFLAGS="$(CFLAGS)"      \
   	STRIP="$(STRIP)"        \
   	./configure             \
   	--prefix=$(INSTALL_DIR) \
-  	--disable-gui           \
-  	--without-x
+	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_GCC) || true
@@ -81,16 +83,15 @@ $(VIM_GCC):
 # Build using gcc and sanitization
 $(VIM_GCC_ASAN):
 	rm -rf $(INSTALL_DIR) || true
-	rm src/auto/config.cache || true
+	rm ../src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(GCC)                       \
+	cd .. ; CC=$(GCC)                     \
   	CFLAGS="$(CFLAGS) -fsanitize=address" \
   	LDFLAGS="-fsanitize=address"          \
   	STRIP="$(STRIP)"                      \
   	./configure                           \
   	--prefix=$(INSTALL_DIR)               \
-  	--disable-gui                         \
-  	--without-x
+	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_GCC_ASAN) || true
@@ -121,15 +122,14 @@ vx-clang-clang_asan: $(VIM_CLANG) $(VIM_CLANG_ASAN)
 # Build using clang and no sanitization
 $(VIM_CLANG):
 	rm -rf $(INSTALL_DIR) || true
-	rm src/auto/config.cache || true
+	rm ../src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(CLANG)       \
+	cd .. ; CC=$(CLANG)     \
   	CFLAGS="$(CFLAGS)"      \
   	STRIP="$(STRIP)"        \
   	./configure             \
   	--prefix=$(INSTALL_DIR) \
-  	--disable-gui           \
-  	--without-x
+	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_CLANG) || true
@@ -138,16 +138,15 @@ $(VIM_CLANG):
 # Build using clang and sanitization
 $(VIM_CLANG_ASAN):
 	rm -rf $(INSTALL_DIR) || true
-	rm src/auto/config.cache || true
+	rm ../src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(CLANG)                     \
+	cd .. ; CC=$(CLANG)                   \
   	CFLAGS="$(CFLAGS) -fsanitize=address" \
   	LDFLAGS="-fsanitize=address"          \
   	STRIP="$(STRIP)"                      \
   	./configure                           \
   	--prefix=$(INSTALL_DIR)               \
-  	--disable-gui                         \
-  	--without-x
+	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_CLANG_ASAN) || true
