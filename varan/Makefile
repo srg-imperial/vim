@@ -16,7 +16,8 @@ CFLAGS = -O0 -g
 VIM_CFG_FLAGS=--disable-gui --without-x --with-features=huge
 
 # Where each version expects to be installed
-INSTALL_DIR      = $(PWD)/install/vim
+INSTALL_DIR       = $(PWD)/install
+INSTALL_BUILD_DIR = $(INSTALL_DIR)/vim
 
 # Where different versions are installed
 INSTALL_GCC        = $(PWD)/install/gcc-system
@@ -31,7 +32,8 @@ VIM_CLANG      = $(INSTALL_CLANG)/bin/vim
 VIM_CLANG_ASAN = $(INSTALL_CLANG_ASAN)/bin/vim
 
 # Script to run VIM with Varan
-VIM = $(PWD)/bin/vim
+VIM_DIR = $(PWD)/bin
+VIM = $(VIM_DIR)/vim
 
 # Command lines to run VIM with Varan inside script
 RUN_GCC_GCC          =                              $(VX) $(VIM_GCC) $(VIM_GCC)          -- \$$@
@@ -48,8 +50,9 @@ all: vx-gcc-gcc_asan
 
 # Set up script for native leader and native follower built with gcc
 vx-gcc-gcc: $(VIM_GCC)
-	rm -rf $(INSTALL_DIR) || true
-	cp -r $(INSTALL_GCC) $(INSTALL_DIR)
+	mkdir -p $(VIM_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
+	cp -r $(INSTALL_GCC) $(INSTALL_BUILD_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"        >  $(VIM)
 	echo "$(RUN_GCC_GCC)" >> $(VIM)
@@ -57,8 +60,9 @@ vx-gcc-gcc: $(VIM_GCC)
 
 # Set up script for native leader and sanitized follower built with gcc
 vx-gcc-gcc_asan: $(VIM_GCC) $(VIM_GCC_ASAN)
-	rm -rf $(INSTALL_DIR) || true
-	cp -r $(INSTALL_GCC) $(INSTALL_DIR)
+	mkdir -p $(VIM_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
+	cp -r $(INSTALL_GCC) $(INSTALL_BUILD_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"             >  $(VIM)
 	echo "$(RUN_GCC_GCC_ASAN)" >> $(VIM)
@@ -66,23 +70,23 @@ vx-gcc-gcc_asan: $(VIM_GCC) $(VIM_GCC_ASAN)
 
 # Build using gcc and no sanitization
 $(VIM_GCC):
-	rm -rf $(INSTALL_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
 	rm ../src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(GCC)       \
-  	CFLAGS="$(CFLAGS)"      \
-  	STRIP="$(STRIP)"        \
-  	./configure             \
-  	--prefix=$(INSTALL_DIR) \
+	cd .. ; CC=$(GCC)             \
+  	CFLAGS="$(CFLAGS)"            \
+  	STRIP="$(STRIP)"              \
+  	./configure                   \
+  	--prefix=$(INSTALL_BUILD_DIR) \
 	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_GCC) || true
-	mv $(INSTALL_DIR) $(INSTALL_GCC)
+	mv $(INSTALL_BUILD_DIR) $(INSTALL_GCC)
 
 # Build using gcc and sanitization
 $(VIM_GCC_ASAN):
-	rm -rf $(INSTALL_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
 	rm ../src/auto/config.cache || true
 	make -C .. clean
 	cd .. ; CC=$(GCC)                     \
@@ -90,12 +94,12 @@ $(VIM_GCC_ASAN):
   	LDFLAGS="-fsanitize=address"          \
   	STRIP="$(STRIP)"                      \
   	./configure                           \
-  	--prefix=$(INSTALL_DIR)               \
+  	--prefix=$(INSTALL_BUILD_DIR)         \
 	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_GCC_ASAN) || true
-	mv $(INSTALL_DIR) $(INSTALL_GCC_ASAN)
+	mv $(INSTALL_BUILD_DIR) $(INSTALL_GCC_ASAN)
 
 # ==============================================================================
 # CLANG targets
@@ -103,8 +107,9 @@ $(VIM_GCC_ASAN):
 
 # Set up script for native leader and native follower built with clang
 vx-clang-clang: $(VIM_CLANG)
-	rm -rf $(INSTALL_DIR) || true
-	cp -r $(INSTALL_CLANG) $(INSTALL_DIR)
+	mkdir -p $(VIM_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
+	cp -r $(INSTALL_CLANG) $(INSTALL_BUILD_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"            >  $(VIM)
 	echo "$(RUN_CLANG_CLANG)" >> $(VIM)
@@ -112,8 +117,9 @@ vx-clang-clang: $(VIM_CLANG)
 
 # Set up script for native leader and sanitized follower built with clang
 vx-clang-clang_asan: $(VIM_CLANG) $(VIM_CLANG_ASAN)
-	rm -rf $(INSTALL_DIR) || true
-	cp -r $(INSTALL_CLANG) $(INSTALL_DIR)
+	mkdir -p $(VIM_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
+	cp -r $(INSTALL_CLANG) $(INSTALL_BUILD_DIR)
 	rm $(VIM) || true
 	echo "#!$(SH)"                 >  $(VIM)
 	echo "$(RUN_CLANG_CLANG_ASAN)" >> $(VIM)
@@ -121,23 +127,23 @@ vx-clang-clang_asan: $(VIM_CLANG) $(VIM_CLANG_ASAN)
 
 # Build using clang and no sanitization
 $(VIM_CLANG):
-	rm -rf $(INSTALL_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
 	rm ../src/auto/config.cache || true
 	make -C .. clean
-	cd .. ; CC=$(CLANG)     \
-  	CFLAGS="$(CFLAGS)"      \
-  	STRIP="$(STRIP)"        \
-  	./configure             \
-  	--prefix=$(INSTALL_DIR) \
+	cd .. ; CC=$(CLANG)           \
+  	CFLAGS="$(CFLAGS)"            \
+  	STRIP="$(STRIP)"              \
+  	./configure                   \
+  	--prefix=$(INSTALL_BUILD_DIR) \
 	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_CLANG) || true
-	mv $(INSTALL_DIR) $(INSTALL_CLANG)
+	mv $(INSTALL_BUILD_DIR) $(INSTALL_CLANG)
 
 # Build using clang and sanitization
 $(VIM_CLANG_ASAN):
-	rm -rf $(INSTALL_DIR) || true
+	rm -rf $(INSTALL_BUILD_DIR) || true
 	rm ../src/auto/config.cache || true
 	make -C .. clean
 	cd .. ; CC=$(CLANG)                   \
@@ -145,9 +151,18 @@ $(VIM_CLANG_ASAN):
   	LDFLAGS="-fsanitize=address"          \
   	STRIP="$(STRIP)"                      \
   	./configure                           \
-  	--prefix=$(INSTALL_DIR)               \
+  	--prefix=$(INSTALL_BUILD_DIR)         \
 	$(VIM_CFG_FLAGS)
 	make -C ..
 	make -C ../src install
 	rm -rf $(INSTALL_CLANG_ASAN) || true
-	mv $(INSTALL_DIR) $(INSTALL_CLANG_ASAN)
+	mv $(INSTALL_BUILD_DIR) $(INSTALL_CLANG_ASAN)
+
+# ==============================================================================
+# misc targets
+# ==============================================================================
+
+clean:
+	make -C .. clean || true
+	rm -rf $(INSTALL_DIR) || true
+	rm -rf $(VIM_DIR) || true
